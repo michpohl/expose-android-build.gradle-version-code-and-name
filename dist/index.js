@@ -37,53 +37,49 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(186));
-const wait_1 = __webpack_require__(817);
-function run() {
+// import * as exec from '@actions/exec';
+const fs = __importStar(__webpack_require__(747));
+process.on('unhandledRejection', handleError);
+main().catch(handleError);
+function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const ms = core.getInput('milliseconds');
-            core.debug(`Waiting ${ms} milliseconds ...`); // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-            core.debug(new Date().toTimeString());
-            yield wait_1.wait(parseInt(ms, 10));
-            core.debug(new Date().toTimeString());
-            core.setOutput('time', new Date().toTimeString());
+            // let printFile = getBooleanInput('print-file');
+            let buildGradlePath = core.getInput('path');
+            if (!fs.existsSync(buildGradlePath)) {
+                core.setFailed(`The file path for the build.gradle does not exist or is not found: ${buildGradlePath}`);
+                process.exit(1);
+            }
+            // if (printFile) {
+            //     core.info('Before update:');
+            //     await exec.exec('cat', [buildGradlePath]);
+            // }
+            let filecontent = fs.readFileSync(buildGradlePath).toString();
+            fs.chmodSync(buildGradlePath, "600");
+            const matches = filecontent.match(/versionCode\s*(\d+(?:\.\d)*)/mg);
+            let code = "fail";
+            if (matches) {
+                code = matches[1];
+            }
+            console.log(code);
+            setEnvironmentVariable('VERSION_CODE', code);
+            // core.info(`build.gradle updated successfully with versionCode: ${versionCode} and versionName: ${versionName}.`);
         }
         catch (error) {
             core.setFailed(error.message);
         }
     });
 }
-run();
-
-
-/***/ }),
-
-/***/ 817:
-/***/ (function(__unused_webpack_module, exports) {
-
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = void 0;
-function wait(milliseconds) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => {
-            if (isNaN(milliseconds)) {
-                throw new Error('milliseconds not a number');
-            }
-            setTimeout(() => resolve('done!'), milliseconds);
-        });
-    });
+function handleError(err) {
+    console.error(err);
+    core.setFailed(`Unhandled error: ${err}`);
 }
-exports.wait = wait;
+const setEnvironmentVariable = (key, value) => {
+    core.exportVariable(key, value);
+};
+// function getBooleanInput(inputName: string, defaultValue: boolean = false): boolean {
+//     return (core.getInput(inputName) || String(defaultValue)).toUpperCase() === 'TRUE';
+// }
 
 
 /***/ }),

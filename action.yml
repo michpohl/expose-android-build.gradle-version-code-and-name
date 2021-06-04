@@ -2,10 +2,10 @@ name: 'Your name here'
 description: 'Provide a description here'
 author: 'Your name or organization here'
 inputs:
-  milliseconds: # change this
+  path: # change this
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'path to your app build.gradle'
+    default: 'app/build.gradle'
 runs:
   using: 'node12'
   main: 'dist/index.js'

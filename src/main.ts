@@ -1,19 +1,51 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import * as core from '@actions/core';
+// import * as exec from '@actions/exec';
+import * as fs from 'fs';
 
-async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+process.on('unhandledRejection', handleError)
+main().catch(handleError)
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+async function main(): Promise<void> {
+    try {
+        // let printFile = getBooleanInput('print-file');
+        let buildGradlePath = core.getInput('path');
 
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    core.setFailed(error.message)
-  }
+        if (!fs.existsSync(buildGradlePath)) {
+            core.setFailed(`The file path for the build.gradle does not exist or is not found: ${buildGradlePath}`);
+            process.exit(1);
+        }
+
+        // if (printFile) {
+        //     core.info('Before update:');
+        //     await exec.exec('cat', [buildGradlePath]);
+        // }
+
+        let filecontent = fs.readFileSync(buildGradlePath).toString();
+        fs.chmodSync(buildGradlePath, "600");
+
+        const matches = filecontent.match(/versionCode\s*(\d+(?:\.\d)*)/mg);
+        let code = "fail";
+        if (matches) {
+          code = matches[1];
+        }
+        console.log(code);
+        setEnvironmentVariable('VERSION_CODE', code);
+       
+        // core.info(`build.gradle updated successfully with versionCode: ${versionCode} and versionName: ${versionName}.`);
+    } catch (error) {
+        core.setFailed(error.message);
+    }
 }
 
-run()
+function handleError(err: any): void {
+    console.error(err)
+    core.setFailed(`Unhandled error: ${err}`)
+}
+
+const setEnvironmentVariable = (key: string, value: string) => {
+  core.exportVariable(key, value);
+};
+
+// function getBooleanInput(inputName: string, defaultValue: boolean = false): boolean {
+//     return (core.getInput(inputName) || String(defaultValue)).toUpperCase() === 'TRUE';
+// }
