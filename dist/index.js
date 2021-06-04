@@ -41,29 +41,64 @@ const core = __importStar(__webpack_require__(186));
 const fs = __importStar(__webpack_require__(747));
 process.on('unhandledRejection', handleError);
 main().catch(handleError);
+function getBooleanInput(inputName, defaultValue = false) {
+    return (core.getInput(inputName) || String(defaultValue)).toUpperCase() === 'TRUE';
+}
+function setEnvironmentVariable(key, value) {
+    core.exportVariable(key, value);
+}
+;
+function getVersionCode(content) {
+    let versionCode;
+    const codeMatches = content.match(/(versionCode [\d]*)/is);
+    if (codeMatches) {
+        versionCode = codeMatches[0];
+    }
+    return versionCode;
+}
+function getVersionName(content) {
+    let versionName;
+    const nameMatches = content.match(/(versionName "[\s\S]*?")/is);
+    if (nameMatches) {
+        versionName = nameMatches[0];
+    }
+    return versionName;
+}
+function failWithMessage(message) {
+    core.setFailed(message);
+    process.exit(1);
+}
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            // let printFile = getBooleanInput('print-file');
             let buildGradlePath = core.getInput('path');
+            let shouldExposeCode = getBooleanInput('expose-version-code');
+            let shouldExposeName = getBooleanInput('expose-version-name');
             if (!fs.existsSync(buildGradlePath)) {
-                core.setFailed(`The file path for the build.gradle does not exist or is not found: ${buildGradlePath}`);
-                process.exit(1);
+                failWithMessage(`The file path for the build.gradle does not exist or is not found: ${buildGradlePath}`);
             }
-            // if (printFile) {
-            //     core.info('Before update:');
-            //     await exec.exec('cat', [buildGradlePath]);
-            // }
-            let filecontent = fs.readFileSync(buildGradlePath).toString();
+            let fileContent = fs.readFileSync(buildGradlePath).toString();
             fs.chmodSync(buildGradlePath, "600");
-            const matches = filecontent.match(/versionCode\s*(\d+(?:\.\d)*)/mg);
-            let code = "fail";
-            if (matches) {
-                code = matches[1];
+            if (shouldExposeCode) {
+                let code = getVersionCode(fileContent);
+                if (code != null) {
+                    setEnvironmentVariable('ANDROID_VERSION_CODE', code);
+                }
+                else {
+                    failWithMessage('Version code could not be found in the file');
+                    core.info(`Exposing ANDROID_VERSION_CODE with: ${code}.`);
+                }
             }
-            console.log(code);
-            setEnvironmentVariable('VERSION_CODE', code);
-            // core.info(`build.gradle updated successfully with versionCode: ${versionCode} and versionName: ${versionName}.`);
+            if (shouldExposeName) {
+                let name = getVersionName(fileContent);
+                if (name != null) {
+                    setEnvironmentVariable('ANDROID_VERSION_NAME', name);
+                    core.info(`Exposing ANDROID_VERSION_NAME with: ${name}.`);
+                }
+                else {
+                    failWithMessage('Version name could not be found in the file');
+                }
+            }
         }
         catch (error) {
             core.setFailed(error.message);
@@ -74,12 +109,6 @@ function handleError(err) {
     console.error(err);
     core.setFailed(`Unhandled error: ${err}`);
 }
-const setEnvironmentVariable = (key, value) => {
-    core.exportVariable(key, value);
-};
-// function getBooleanInput(inputName: string, defaultValue: boolean = false): boolean {
-//     return (core.getInput(inputName) || String(defaultValue)).toUpperCase() === 'TRUE';
-// }
 
 
 /***/ }),

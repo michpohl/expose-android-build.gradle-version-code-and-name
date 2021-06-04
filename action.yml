@@ -1,11 +1,19 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: Your name here
+description: Provide a description here
+author: Your name or organization here
 inputs:
-  path: # change this
-    required: true
-    description: 'path to your app build.gradle'
-    default: 'app/build.gradle'
+  path:
+    required: false
+    description: Path to your app build.gradle
+    default: app/build.gradle
+  expose-version-code:
+    required: false
+    description: expose version code
+    default: 'true'
+  expose-version-name:
+    required: false
+    description: expose version name
+    default: 'true'
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: node12
+  main: dist/index.js
