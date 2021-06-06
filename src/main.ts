@@ -17,7 +17,7 @@ function getVersionCode(content: string): any {
   const codeMatches = content.match(/(versionCode [\d]*)/is);
   if (codeMatches) {
     const codeParts = codeMatches[0].split(" ");
-    versionCode = codeParts[codeParts.length -1]
+    versionCode = codeParts[codeParts.length - 1]
   }
   return versionCode;
 }
@@ -29,9 +29,6 @@ function getVersionName(content: string): any {
 
   if (nameMatches) {
     const nameParts = nameMatches[0].split("\"");
-    nameParts.forEach(function (value) {
-      core.info(value);
-    })
     versionName = nameParts[1];
   }
   return versionName;
@@ -59,9 +56,9 @@ async function main(): Promise<void> {
       let code = getVersionCode(fileContent);
       if (code != null) {
         setEnvironmentVariable('ANDROID_VERSION_CODE', code);
+        core.info(`Exposing ANDROID_VERSION_CODE with this value: ${code}.`);
       } else {
         failWithMessage('Version code could not be found in the file');
-        core.info(`Exposing ANDROID_VERSION_CODE with: ${code}.`);
 
       }
     }
@@ -70,8 +67,7 @@ async function main(): Promise<void> {
       let name = getVersionName(fileContent);
       if (name != null) {
         setEnvironmentVariable('ANDROID_VERSION_NAME', name);
-        core.info(`Exposing ANDROID_VERSION_NAME with: ${name}.`);
-
+        core.info(`Exposing ANDROID_VERSION_NAME with this value: ${name}.`);
       } else {
         failWithMessage('Version name could not be found in the file');
       }
