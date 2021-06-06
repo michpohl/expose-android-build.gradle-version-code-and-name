@@ -51,7 +51,8 @@ function getVersionCode(content) {
     let versionCode;
     const codeMatches = content.match(/(versionCode [\d]*)/is);
     if (codeMatches) {
-        versionCode = codeMatches[0];
+        const codeParts = codeMatches[0].split(" ");
+        versionCode = codeParts[codeParts.length - 1];
     }
     return versionCode;
 }
@@ -59,8 +60,7 @@ function getVersionName(content) {
     let versionName;
     const nameMatches = content.match(/(versionName "[\s\S]*?")/is);
     if (nameMatches) {
-        versionName = nameMatches[0];
-        const nameParts = versionName.split("\"");
+        const nameParts = nameMatches[0].split("\"");
         nameParts.forEach(function (value) {
             core.info(value);
         });
