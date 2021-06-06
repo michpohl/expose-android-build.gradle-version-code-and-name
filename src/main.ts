@@ -28,6 +28,11 @@ function getVersionName(content: string): any {
 
   if (nameMatches) {
     versionName = nameMatches[0];
+    const nameParts = versionName.split("\"");
+    nameParts.forEach(function (value) {
+      core.info(value);
+    })
+    versionName = nameParts[1];
   }
   return versionName;
 }

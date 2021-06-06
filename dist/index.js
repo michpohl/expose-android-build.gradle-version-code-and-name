@@ -37,7 +37,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(186));
-// import * as exec from '@actions/exec';
 const fs = __importStar(__webpack_require__(747));
 process.on('unhandledRejection', handleError);
 main().catch(handleError);
@@ -61,6 +60,11 @@ function getVersionName(content) {
     const nameMatches = content.match(/(versionName "[\s\S]*?")/is);
     if (nameMatches) {
         versionName = nameMatches[0];
+        const nameParts = versionName.split("\"");
+        nameParts.forEach(function (value) {
+            core.info(value);
+        });
+        versionName = nameParts[1];
     }
     return versionName;
 }
