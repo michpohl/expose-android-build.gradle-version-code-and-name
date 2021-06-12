@@ -1,17 +1,17 @@
-name: Your name here
-description: Provide a description here
-author: Your name or organization here
+name: Expose Android version code and name
+description: Finds the version code and version name in your build.gradle file and publishes it as env vars.
+author: Michael Pohl
 inputs:
   path:
     required: false
-    description: Path to your app build.gradle
+    description: Path to your app's build.gradle
     default: app/build.gradle
   expose-version-code:
     required: true
-    description: expose version code
+    description: Expose version code
   expose-version-name:
     required: true
-    description: expose version name
+    description: Expose version name
 runs:
   using: node12
   main: dist/index.js
